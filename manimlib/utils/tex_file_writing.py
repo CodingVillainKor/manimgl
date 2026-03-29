@@ -135,6 +135,7 @@ def full_tex_to_svg(full_tex: str, compiler: str = "latex", message: str = ""):
             "dvisvgm",
             dvi_path,
             "-n",  # no fonts
+            "--fontmap=ps2pk.map",  # explicit font map for MiKTeX
             "-v", "0",  # quiet
             "--stdout",  # output to stdout instead of file
         ],
