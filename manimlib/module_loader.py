@@ -122,14 +122,14 @@ class ModuleLoader:
         module_path = getattr(module, "__file__", None)
         if module_path is None:
             return False
-        module_path = os.path.abspath(module_path)
+        module_path = os.path.normcase(os.path.abspath(module_path))
 
         # External libraries (site-packages or dist-packages), e.g. numpy
         if "site-packages" in module_path or "dist-packages" in module_path:
             return False
 
         # Standard lib
-        standard_lib_path = sysconfig.get_path("stdlib")
+        standard_lib_path = os.path.normcase(sysconfig.get_path("stdlib"))
         if module_path.startswith(standard_lib_path):
             return False
 
