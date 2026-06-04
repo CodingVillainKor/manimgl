@@ -81,7 +81,7 @@ class Window(PygletWindow):
             return screeninfo.Monitor(width=1920, height=1080)
 
     def get_default_size(self, full_screen=False):
-        width = self.monitor.width // (1 if full_screen else 2)
+        width = self.monitor.width // (1 if full_screen else 3)
         height = int(width // ASPECT_RATIO)
         return (width, height)
 
