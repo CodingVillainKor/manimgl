@@ -156,7 +156,7 @@ class SVGMobject(VMobject):
         return self.mobjects_from_svg(svg)
 
     def file_name_to_svg_string(self, file_name: str) -> str:
-        return Path(get_full_vector_image_path(file_name)).read_text()
+        return Path(get_full_vector_image_path(file_name)).read_text(encoding="utf-8")
 
     def modify_xml_tree(self, element_tree: ET.ElementTree) -> ET.ElementTree:
         config_style_attrs = self.generate_config_style_dict()
