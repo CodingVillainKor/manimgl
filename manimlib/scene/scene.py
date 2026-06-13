@@ -753,6 +753,16 @@ class Scene(object):
             ff_d_point *= self.pan_sensitivity
             frame.increment_theta(-ff_d_point[0])
             frame.increment_phi(ff_d_point[1])
+        # Handle camera yaw about the screen's vertical (up) axis, driven by
+        # left/right mouse motion (vertical motion is ignored). Unlike the theta
+        # part of the 'd' control, which orbits about the fixed world up axis,
+        # this rotates about the camera's *current* up axis, swinging the view
+        # left/right to look at the scene from its sides.
+        elif self.window.is_key_pressed(ord(manim_config.key_bindings.yaw)):
+            ff_d_point = frame.to_fixed_frame_point(d_point, relative=True)
+            ff_d_point *= self.pan_sensitivity
+            up_axis = frame.get_inverse_camera_rotation_matrix()[1]
+            frame.rotate(-ff_d_point[0], axis=up_axis)
         # Handle frame movements
         elif self.window.is_key_pressed(ord(manim_config.key_bindings.pan)):
             frame.shift(-d_point)
