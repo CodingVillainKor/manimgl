@@ -682,7 +682,9 @@ class InteractiveDevelopment(Scene):
         # To interact with the window, type touch().  You can then
         # scroll in the window, or zoom by holding down 'z' while scrolling,
         # and change camera perspective by holding down 'd' while moving
-        # the mouse.  Hold 'e' and move the mouse left/right to yaw the camera
+        # the mouse.  Hold 'c' for the same motion, except moving the mouse
+        # down keeps tilting the camera past the default view instead of
+        # stopping there.  Hold 'e' and move the mouse left/right to yaw the camera
         # about the screen's vertical axis, swinging the view around to look at
         # the scene from its sides.
         # Press 'r' to reset to the standard camera position.

@@ -115,6 +115,7 @@ sizes:
   default_mobject_to_mobject_buff: 0.25
 key_bindings:
   pan_3d: "d"
+  pan_3d_mirror: "c"
   yaw: "e"
   pan: "f"
   reset: "r"

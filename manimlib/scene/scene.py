@@ -753,6 +753,12 @@ class Scene(object):
             ff_d_point *= self.pan_sensitivity
             frame.increment_theta(-ff_d_point[0])
             frame.increment_phi(ff_d_point[1])
+        # Mirror of 'd': same motions, but phi may tilt below the default view
+        # (negative phi) instead of stopping there when the mouse moves down.
+        elif self.window.is_key_pressed(ord(manim_config.key_bindings.pan_3d_mirror)):
+            ff_d_point = frame.to_fixed_frame_point(d_point, relative=True)
+            ff_d_point *= self.pan_sensitivity
+            frame.increment_mirrored_euler_angles(-ff_d_point[0], ff_d_point[1])
         # Handle camera yaw about the screen's vertical (up) axis, driven by
         # left/right mouse motion (vertical motion is ignored). Unlike the theta
         # part of the 'd' control, which orbits about the fixed world up axis,

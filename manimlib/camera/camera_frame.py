@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation
 from manimlib.constants import DEG, RADIANS
 from manimlib.constants import FRAME_SHAPE
 from manimlib.constants import DOWN, LEFT, ORIGIN, OUT, RIGHT, UP
-from manimlib.constants import PI
+from manimlib.constants import PI, TAU
 from manimlib.mobject.mobject import Mobject
 from manimlib.utils.space_ops import normalize
 from manimlib.utils.simple_functions import clip
@@ -163,6 +163,38 @@ class CameraFrame(Mobject):
             new_angles[1] = clip(new_angles[1], -PI / 2, PI / 2)
 
         new_rot = Rotation.from_euler(self.euler_axes, new_angles[::-1])
+        self.set_orientation(new_rot)
+        return self
+
+    def increment_mirrored_euler_angles(
+        self,
+        dtheta: float = 0,
+        dphi: float = 0,
+        units: float = RADIANS
+    ):
+        """
+        Mirror of increment_euler_angles for tilting below the default view:
+        phi is allowed to go negative, down to -PI, but cannot be raised above
+        max(current phi, 0), so the view never jumps when this takes over.
+        """
+        if self.euler_axes != "zxz":
+            return self.increment_euler_angles(dtheta=dtheta, dphi=dphi, units=units)
+
+        theta, phi, gamma = self.get_euler_angles()
+        # as_euler always reports phi in [0, PI], so a negative phi comes back
+        # as the equivalent (theta + PI, -phi, gamma + PI).  Undo that whenever
+        # it leaves gamma closer to zero.
+        if abs((gamma + PI) % TAU - PI) > PI / 2:
+            theta, phi, gamma = theta - PI, -phi, gamma - PI
+        # Looking straight up, phi = PI and -PI are the same orientation;
+        # take the mirrored one so this stays at its lower limit.
+        if np.isclose(phi, PI, atol=1e-2):
+            phi = -PI
+
+        theta += dtheta * units
+        phi = clip(phi + dphi * units, -PI, max(phi, 0))
+
+        new_rot = Rotation.from_euler(self.euler_axes, [gamma, phi, theta])
         self.set_orientation(new_rot)
         return self
 
