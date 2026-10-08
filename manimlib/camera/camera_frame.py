@@ -119,8 +119,15 @@ class CameraFrame(Mobject):
         return np.linalg.inv(self.get_view_matrix())
 
     @Mobject.affects_data
-    def interpolate(self, *args, **kwargs):
-        super().interpolate(*args, **kwargs)
+    def interpolate(self, mobject1, mobject2, alpha, *args, **kwargs):
+        super().interpolate(mobject1, mobject2, alpha, *args, **kwargs)
+        # q and -q are the same orientation; blend toward whichever is closer
+        # to the start so the camera turns the short way around
+        if "orientation" in mobject1.uniforms and "orientation" in mobject2.uniforms:
+            q1 = mobject1.uniforms["orientation"]
+            q2 = mobject2.uniforms["orientation"]
+            if np.dot(q1, q2) < 0:
+                self.uniforms["orientation"] = (1 - alpha) * q1 - alpha * q2
 
     @Mobject.affects_data
     def rotate(self, angle: float, axis: np.ndarray = OUT, **kwargs):
