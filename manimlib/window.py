@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import ctypes
+import sys
+
 import numpy as np
 
 import moderngl_window as mglw
@@ -10,6 +13,7 @@ import screeninfo
 
 from manimlib.constants import ASPECT_RATIO
 from manimlib.constants import FRAME_SHAPE
+from manimlib.logger import log
 
 from typing import TYPE_CHECKING
 
@@ -33,6 +37,7 @@ class Window(PygletWindow):
         position_string: str = "UR",
         monitor_index: int = 1,
         full_screen: bool = False,
+        always_on_top: bool = False,
         size: Optional[tuple[int, int]] = None,
         position: Optional[tuple[int, int]] = None,
         samples: int = 0
@@ -45,6 +50,8 @@ class Window(PygletWindow):
 
         super().__init__(samples=samples)
         self.to_default_position()
+        if always_on_top:
+            self.set_always_on_top()
 
         if self.scene:
             self.init_for_scene(scene)
@@ -71,6 +78,23 @@ class Window(PygletWindow):
 
         # This line seems to resync the viewport
         self.on_resize(*self.size)
+
+    def set_always_on_top(self):
+        if sys.platform != "win32":
+            log.warning("always_on_top is only supported on Windows, ignoring it")
+            return
+        from ctypes import wintypes
+        # Use a private handle so the argtypes don't leak into pyglet's windll.user32
+        set_window_pos = ctypes.WinDLL("user32").SetWindowPos
+        set_window_pos.argtypes = [
+            wintypes.HWND, wintypes.HWND,
+            ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+            ctypes.c_uint,
+        ]
+        HWND_TOPMOST = wintypes.HWND(-1)
+        # SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+        flags = 0x0001 | 0x0002 | 0x0010
+        set_window_pos(self._window._hwnd, HWND_TOPMOST, 0, 0, 0, 0, flags)
 
     def get_monitor(self, index):
         try:

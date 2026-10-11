@@ -101,6 +101,11 @@ def parse_cli():
             help="Show window in full screen",
         )
         parser.add_argument(
+            "--always_on_top",
+            action="store_true",
+            help="Keep the window above all other windows (Windows only)",
+        )
+        parser.add_argument(
             "-p", "--presenter_mode",
             action="store_true",
             help="Scene will stay paused during wait calls until " + \
@@ -246,6 +251,8 @@ def update_window_config(config: Dict, args: Namespace):
             window_config[key] = literal_eval(window_config[key])
     if args.full_screen:
         window_config.full_screen = True
+    if args.always_on_top:
+        window_config.always_on_top = True
 
 
 def update_camera_config(config: Dict, args: Namespace):
