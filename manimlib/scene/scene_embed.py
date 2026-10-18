@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import inspect
 import pyperclip
+import textwrap
+import time
 import traceback
 
 from IPython.terminal import pt_inputhooks
@@ -82,9 +84,15 @@ class InteractiveSceneEmbed:
     def enable_gui(self):
         """Enables gui interactions during the embed"""
         def inputhook(context):
+            # Redraw the window and process its events while the shell waits
+            # for input, pacing it to the target frame rate.
+            frame_duration = 1 / self.scene.camera.fps
             while not context.input_is_ready():
-                if not self.scene.is_window_closing():
-                    self.scene.update_frame(dt=0)
+                if self.scene.is_window_closing():
+                    break
+                start_time = time.time()
+                self.scene.update_frame(dt=0)
+                time.sleep(max(frame_duration - (time.time() - start_time), 0))
             if self.scene.is_window_closing():
                 self.shell.ask_exit()
 
@@ -207,6 +215,9 @@ class CheckpointManager:
         was called on a block of code starting with that comment.
         """
         code_string = pyperclip.paste()
+        clean_lines = [line.rstrip() for line in code_string.splitlines()]
+        code_string = "\n".join(clean_lines)
+        code_string = textwrap.dedent(code_string)
         checkpoint_key = self.get_leading_comment(code_string)
         self.handle_checkpoint_key(scene, checkpoint_key)
         shell.run_cell(code_string)

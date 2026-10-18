@@ -46,12 +46,19 @@ window:
   monitor_index: 0
   # If not full screen, the default to give it half the screen width
   full_screen: False
-  # Keep the window above all other windows (Windows only)
+  # Keep the window above all other windows
   always_on_top: False
   # Other optional specifications that override the above include:
   # position: (500, 500)  # Specific position, in pixel coordinates, for upper right corner
   # size: (1920, 1080)  # Specific size, in pixels
 camera:
+  # A frame's draws are gathered into a render bundle and replayed for as long as the sequence
+  # of them holds, see Bundling. Turning this off makes every draw afresh each frame, which
+  # says the same thing more slowly.
+  bundle_draws: True
+  # Mobjects which one draw could cover are gathered and drawn together, see Renderer.group.
+  # Turning this off draws each on its own, which says the same thing more slowly.
+  draw_together: True
   resolution: (1920, 1080)
   background_color: "#000000"
   fps: 30
@@ -64,6 +71,11 @@ file_writer:
   pixel_format: "yuv420p"
   saturation: 1.0
   gamma: 1.0
+  # For a render nothing is going to be measured against, the encoder's own default is
+  # plenty. To keep every pixel exactly as it was drawn, say
+  #   video_codec: "libx264rgb"
+  #   pixel_format: "rgb24"
+  #   crf: 0
 # Most of the scene configuration will come from CLI arguments,
 # but defaults can be set here
 scene:
@@ -74,6 +86,7 @@ scene:
   preview_while_skipping: True
   # How long does a scene pause on Scene.wait calls
   default_wait_time: 1.0
+  invert_zoom_scroll: False
 vmobject:
   default_stroke_width: 2.0
   default_stroke_color: "#DDDDDD"     # Default is GREY_A

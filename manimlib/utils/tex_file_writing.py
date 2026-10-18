@@ -38,13 +38,18 @@ def get_tex_config(template: str = "") -> tuple[str, str]:
 
 
 def get_full_tex(content: str, preamble: str = ""):
-    return "\n\n".join((
-        "\\documentclass[preview]{standalone}",
-        preamble,
-        "\\begin{document}",
-        content,
-        "\\end{document}"
-    )) + "\n"
+    return (
+        "\n\n".join(
+            (
+                "\\documentclass[preview]{standalone}",
+                preamble,
+                "\\begin{document}",
+                content,
+                "\\end{document}",
+            )
+        )
+        + "\n"
+    )
 
 
 @lru_cache(maxsize=128)
@@ -95,7 +100,7 @@ def full_tex_to_svg(full_tex: str, compiler: str = "latex", message: str = ""):
 
     # Use the custom LaTeX cache directory from the config
     temp_dir = Path(manim_config.directories.latex_cache)
-    temp_dir.mkdir(exist_ok=True) # Create the directory if it does not already exist
+    temp_dir.mkdir(exist_ok=True)  # Create the directory if it does not already exist
 
     # Define paths for the intermediate TeX and DVI files
     tex_path = temp_dir / "working.tex"
@@ -108,17 +113,17 @@ def full_tex_to_svg(full_tex: str, compiler: str = "latex", message: str = ""):
     process = subprocess.run(
         [
             compiler,
-            *(['-no-pdf'] if compiler == "xelatex" else []),
+            *(["-no-pdf"] if compiler == "xelatex" else []),
             "-interaction=batchmode",
             "-halt-on-error",
             f"-output-directory={temp_dir}",
-            tex_path
+            tex_path.as_posix(),
         ],
         capture_output=True,
-        text=True
+        text=True,
     )
 
-    if process.returncode != 0:
+    if process.returncode != 0 and not dvi_path.exists():
         # Handle error
         error_str = ""
         log_path = tex_path.with_suffix(".log")
@@ -136,14 +141,19 @@ def full_tex_to_svg(full_tex: str, compiler: str = "latex", message: str = ""):
             dvi_path,
             "-n",  # no fonts
             "--fontmap=ps2pk.map",  # explicit font map for MiKTeX
-            "-v", "0",  # quiet
+            "-v",
+            "0",  # quiet
             "--stdout",  # output to stdout instead of file
         ],
-        capture_output=True
+        capture_output=True,
     )
 
+    if process.returncode != 0:
+        error_str = process.stderr.decode("utf-8", errors="replace").strip()
+        raise LatexError(error_str or "dvisvgm failed to convert DVI to SVG")
+
     # Return SVG string
-    result = process.stdout.decode('utf-8')
+    result = process.stdout.decode("utf-8")
 
     if message:
         print(" " * len(message), end="\r")

@@ -21,7 +21,7 @@ Note, there are two versions of manim.  This repository began as a personal proj
 > [!Note]
 > **Note**: To install manim directly through pip, please pay attention to the name of the installed package. This repository is ManimGL of 3b1b. The package name is `manimgl` instead of `manim` or `manimlib`. Please use `pip install manimgl` to install the version in this repository.
 
-Manim runs on Python 3.7 or higher.
+Manim runs on Python 3.10 or higher.
 
 System requirements are [FFmpeg](https://ffmpeg.org/), [OpenGL](https://www.opengl.org/) and [LaTeX](https://www.latex-project.org) (optional, if you want to use LaTeX).
 For Linux, [Pango](https://pango.org) along with its development headers are required. See instruction [here](https://github.com/ManimCommunity/ManimPango#building).
@@ -50,6 +50,60 @@ manimgl example_scenes.py OpeningManimExample
 # or
 manim-render example_scenes.py OpeningManimExample
 ```
+
+### Linux (Ubuntu/Debian)
+
+1. Install system dependencies.
+
+```sh
+sudo apt update
+
+sudo apt install ffmpeg
+sudo apt install python3-pip
+sudo apt install libpango1.0-dev
+```
+
+2. Install a lightweight LaTeX distribution (optional, for LaTeX rendering).
+
+```sh
+sudo apt install texlive-science texlive-fonts-extra texlive-latex-extra
+```
+
+This lightweight setup is significantly smaller than installing `texlive-full`
+while still supporting most Manim projects.
+
+3. Clone and install ManimGL.
+
+```sh
+git clone https://github.com/3b1b/manim.git
+cd manim
+
+python3 -m pip install -e .
+
+manimgl example_scenes.py OpeningManimExample
+```
+
+<details>
+  <summary>💡 Optional: Using a virtual environment (venv)</summary>
+
+It is recommended to use a virtual environment to avoid conflicts with system packages.
+
+```sh
+sudo apt install python3-venv
+
+python3 -m venv venv
+source venv/bin/activate
+
+python3 -m pip install -e .
+```
+
+If `python3-venv` is unavailable on your system, try installing the version-specific package instead:
+
+```sh
+sudo apt install python3.12-venv
+```
+
+</details>
 
 ### Directly (Windows)
 
@@ -89,13 +143,14 @@ manim-render example_scenes.py OpeningManimExample
     git clone https://github.com/3b1b/manim.git
     cd manim
     pip install -e .
-    manimgl example_scenes.py OpeningManimExample (make sure to add manimgl to path first.)
+    manimgl example_scenes.py OpeningManimExample
     ```
+    If the last command is not found, make sure the directory pip installed `manimgl` into is on your `PATH`.
 
 ## Anaconda Install
 
 1. Install LaTeX as above.
-2. Create a conda environment using `conda create -n manim python=3.9`.
+2. Create a conda environment using `conda create -n manim python=3.10`.
 3. Activate the environment using `conda activate manim`.
 4. Install manimgl using `pip install -e .`.
 

@@ -103,7 +103,7 @@ def parse_cli():
         parser.add_argument(
             "--always_on_top",
             action="store_true",
-            help="Keep the window above all other windows (Windows only)",
+            help="Keep the window above all other windows",
         )
         parser.add_argument(
             "-p", "--presenter_mode",
