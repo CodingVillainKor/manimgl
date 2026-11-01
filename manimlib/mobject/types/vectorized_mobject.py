@@ -1444,6 +1444,7 @@ class DashedVMobject(VMobject):
         vmobject: VMobject,
         num_dashes: int = 15,
         positive_space_ratio: float = 0.5,
+        equal_lengths: bool = True,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -1460,13 +1461,49 @@ class DashedVMobject(VMobject):
             # be the end of the last dash
             alphas /= (1 - full_d_alpha + partial_d_alpha)
 
+            starts = alphas[:-1]
+            ends = starts + partial_d_alpha
+            if equal_lengths:
+                # The alphas above are proportions of arc length, while get_subcurve
+                # takes proportions of curve count, so they are mapped across
+                starts, ends = (
+                    self.arc_length_to_curve_proportion(vmobject, a)
+                    for a in (starts, ends)
+                )
+
             self.add(*[
-                vmobject.get_subcurve(alpha, alpha + partial_d_alpha)
-                for alpha in alphas[:-1]
+                vmobject.get_subcurve(a, b)
+                for a, b in zip(starts, ends)
             ])
         # Family is already taken care of by get_subcurve
         # implementation
         self.match_style(vmobject, recurse=False)
+
+    @staticmethod
+    def arc_length_to_curve_proportion(
+        vmobject: VMobject,
+        alphas: np.ndarray,
+        samples_per_curve: int = 8
+    ) -> np.ndarray:
+        points = vmobject.get_points()
+        num_curves = vmobject.get_num_curves()
+        if num_curves == 0:
+            return alphas
+        a0, h, a1 = points[0:-1:2], points[1::2], points[2::2]
+        ts = np.linspace(0, 1, samples_per_curve + 1)[:, np.newaxis, np.newaxis]
+        # Points along every curve at once, shape (samples, curves, 3)
+        samples = (1 - ts)**2 * a0 + 2 * (1 - ts) * ts * h + ts**2 * a1
+        piece_lengths = np.linalg.norm(np.diff(samples, axis=0), axis=2)
+        # A curve whose handle sits on its first anchor is the hop between two
+        # subpaths, which is never drawn, so it takes up no length
+        is_hop = np.linalg.norm(h - a0, axis=1) < vmobject.tolerance_for_point_equality
+        piece_lengths[:, is_hop] = 0
+        # Running arc length against curve proportion, sampled curve by curve
+        cum_lengths = np.append(0, np.cumsum(piece_lengths.T.flatten()))
+        if cum_lengths[-1] == 0:
+            return alphas
+        curve_props = np.linspace(0, 1, len(cum_lengths))
+        return np.interp(np.clip(alphas, 0, 1) * cum_lengths[-1], cum_lengths, curve_props)
 
 
 class VHighlight(VGroup):
