@@ -59,6 +59,11 @@ camera:
   # Mobjects which one draw could cover are gathered and drawn together, see Renderer.group.
   # Turning this off draws each on its own, which says the same thing more slowly.
   draw_together: True
+  # Multisamples per pixel, 0 or 1 meaning none. Fills and strokes anti-alias their own edges
+  # without it, but shapes thinner than a pixel and edges where neighbours meet come out
+  # cleaner with 4, the one count above 1 every device supports. A scene class setting its
+  # own samples, as ThreeDScene does, outranks this.
+  samples: 0
   resolution: (1920, 1080)
   background_color: "#000000"
   fps: 30

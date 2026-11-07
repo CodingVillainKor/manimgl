@@ -57,7 +57,9 @@ class Scene(object):
     max_num_saved_states: int = 50
     default_camera_config: dict = dict()
     default_file_writer_config: dict = dict()
-    samples = 0
+    # Multisamples per pixel. Left as None, the camera section of the configuration decides,
+    # as it does for every other camera setting; a scene class setting it outranks that.
+    samples: int | None = None
     # Euler angles, in degrees
     default_frame_orientation = (0, 0)
 
@@ -104,6 +106,12 @@ class Scene(object):
             self.window.init_for_scene(self)
             # Make sure the camera and the window sync
             self.camera_config["fps"] = 30
+
+        # Taken out of the camera's configuration rather than passed alongside it, since a
+        # samples key there would otherwise be handed to Camera twice
+        config_samples = self.camera_config.pop("samples", 0)
+        if self.samples is None:
+            self.samples = config_samples
 
         # Core state of the scene
         self.camera: Camera = Camera(
